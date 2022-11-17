@@ -10,25 +10,29 @@
  8. Trykk på søk
  9. Forvent og se en av feilmeldingene som dukker opp
  */
-
-
 import {expect, test} from "@playwright/test";
+import { ApplyJob } from "../pages/applyJob.page";
+import { Header } from "../pages/header.page";
+import { JobInfo } from "../pages/jobInfo.page";
+import { Jobs } from "../pages/jobs.page";
 
 test.describe.only("Apply job", () => {
     test("Should fill apply job and show error message", async ({page}) => {
+        const header = new Header(page)
+        const jobs = new Jobs(page)
+        const jobInfo = new JobInfo(page)
+        const applyJob = new ApplyJob(page)
+
         await page.goto("https://www.experis.no/")
-        await page.getByRole("button", {name: "Godta alle cookier"}).click()
-        await page.getByRole("menuitem", {name: "Stillinger"}).click()
-        const searchBox = page.getByRole("textbox", {name: "Stillingstittel, nøkkelord eller bransje"})
-        await expect(searchBox).toBeVisible()
-        await searchBox.click()
-        await searchBox.type("Senior")
-        await searchBox.press("Enter")
-        await page.getByRole("link", {name: /Seniorkonsulent/i}).first().click()
-        await page.getByRole("button", {name: /Søk på stillingen/i}).first().click()
-        await page.getByRole("textbox", {name: "Fornavn"}).type("Lasse")
-        await page.getByRole("textbox", {name: "Etternavn"}).type("Kløvstad")
-        await page.locator("#main").getByRole("button", {name: /Søk/i}).click()
+        await header.cookieButton.click()        
+        await header.clickJobs()
+        await jobs.searchForText("Senior")
+        await jobs.clickSearchResult("Seniorkonsulent")
+        await jobInfo.applyForJobButton.click()
+        await applyJob.firstName.type("Joakim")
+        await applyJob.lastName.type("Bjerkheim")
+        await applyJob.applyButton.click()
+
         await expect(page.getByText("E-post er obligatorisk")).toBeVisible()
     })
 })
